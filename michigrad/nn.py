@@ -18,6 +18,8 @@ class Neuron(Module):
         self.nonlin = nonlin
 
     def __call__(self, x):
+        # realiza la forward pass de la neurona 
+        # x es un arreglo
         act = sum((wi*xi for wi,xi in zip(self.w, x)), self.b)
         return act.relu() if self.nonlin else act
 
