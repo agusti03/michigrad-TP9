@@ -69,7 +69,15 @@ class MLP(Module):
     #   capa de salida con una entrada
     def __init__(self, nin, nouts):
         sz = [nin] + nouts # lista que se recorre para crear las capas
-        self.layers = [Layer(sz[i], sz[i+1], nonlin=i!=len(nouts)-1) for i in range(len(nouts))]
+        self.layers = []
+        for i in range(len(nouts)):
+            # aca la idea es que si nonlin es False se creen las capas con nonlin=False
+            # y que si es True, la última capa no tenga función de activación
+            if(nonlin):
+                nonlin = i != len(nouts) - 1 # la última capa no tiene función de activación
+        
+            layer = Layer(sz[i], sz[i+1], nonlin=nonlin)
+            self.layers.append(layer)
             # cada capa se crea con sus entradas y las entradas de la capa siguiente
             # capa de entrada: 2, 3
             # hidden 1 : 3, 3
