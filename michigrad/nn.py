@@ -28,6 +28,7 @@ class Neuron(Module):
         return act.relu() if self.nonlin else act
 
     def parameters(self):
+        # retorna una lista tal que [w0, w1, ..., wn, b]
         return self.w + [self.b]
 
     def __repr__(self):
@@ -55,8 +56,9 @@ class Layer(Module):
             # out es un arreglo de tamaño nout
 
     def parameters(self):
-        return [p for n in self.neurons for p in n.parameters()] # la falsedad de la expresividad de python
-
+        # obtener la lista de parametros de todas las neuronas
+        return [p for n in self.neurons for p in n.parameters()] # recorrido de lista de listas
+    
     def __repr__(self):
         return f"Layer of [{', '.join(str(n) for n in self.neurons)}]"
 
@@ -92,7 +94,8 @@ class MLP(Module):
         return x
 
     def parameters(self):
-        return [p for layer in self.layers for p in layer.parameters()]
+        # obtiene la lista de parámetros de todas las capas (de todas las neuronas)
+        return [p for layer in self.layers for p in layer.parameters()] # recorrido de lista de listas
 
     def __repr__(self):
         return f"MLP of [{', '.join(str(layer) for layer in self.layers)}]"
