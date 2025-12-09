@@ -12,7 +12,7 @@ class Module:
 
 class Neuron(Module):
 
-    def __init__(self, nin, nonlin=True):
+    def __init__(self, nin, nonlin="relu"):
         self.w = [Value(random.uniform(-1,1)) for _ in range(nin)]
         self.b = Value(0)
         self.nonlin = nonlin
@@ -25,14 +25,25 @@ class Neuron(Module):
         # puede modificarse para implementar cualquier función de activ.
         act = sum((wi*xi for wi,xi in zip(self.w, x)), self.b) 
             # zip combina wi con xi
-        return act.relu() if self.nonlin else act
+
+        match self.nonlin:
+            case "relu": return act.relu()
+            case "sigmoid": return act.sigmoid()
+            case "tanh": return act.tanh()
+            case _: return act       
+        #return act.relu() if self.nonlin else act
 
     def parameters(self):
         # retorna una lista tal que [w0, w1, ..., wn, b]
         return self.w + [self.b]
 
     def __repr__(self):
-        return f"{'ReLU' if self.nonlin else 'Linear'}Neuron({len(self.w)})"
+        match self.nonlin:
+            case "relu": return f"ReLU Neuron({len(self.w)})"
+            case "sigmoid": return f"Sigmoid Neuron({len(self.w)})"
+            case "tanh": return f"Tanh Neuron({len(self.w)})"
+            case _: return f"Linear Neuron({len(self.w)})"  
+        #return f"{'ReLU' if self.nonlin else 'Linear'}Neuron({len(self.w)})"
 
 class Layer(Module):
     # Define una capa de neuronas
@@ -69,6 +80,9 @@ class MLP(Module):
     #   una hidden con 3 entradas
     #   segunda hidden con 3 entradas
     #   capa de salida con una entrada
+
+
+    """
     def __init__(self, nin, nouts, nonlin=True):
         sz = [nin] + nouts # lista que se recorre para crear las capas
         self.layers = []
@@ -86,6 +100,17 @@ class MLP(Module):
             # hidden 1 : 3, 3
             # hidden 2 : 3, 1
             # salida : 1 (no tiene salida)
+
+    """
+    def __init__(self, nin, nouts, nonlin=True):
+        sz = [nin] + nouts 
+        self.layers = []
+        for i in range(len(nouts)-1):
+            layer = Layer(sz[i], sz[i+1], nonlin=nonlin)
+            self.layers.append(layer)
+        layer = Layer(sz[-2], sz[-1], nonlin="linear") # última capa sin función de activación
+        self.layers.append(layer)
+    
 
     def __call__(self, x):
         # llama a la función que define cada Layer

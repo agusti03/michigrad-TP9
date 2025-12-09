@@ -52,6 +52,12 @@ class Value:
         out._backward = _backward
 
         return out
+    
+    def sigmoid(self):
+        return 0
+    
+    def tanh(self):
+        return 0
 
     def exp(self):
         x = self.data
