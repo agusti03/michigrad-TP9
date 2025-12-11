@@ -19,9 +19,6 @@ class Neuron(Module):
     def __call__(self, x):
         # realiza la forward pass de la neurona 
         # x es un arreglo
-        # pasar nonlin = False para usar función de activación lineal
-        # nonlin = True usa ReLU
-        # puede modificarse para implementar cualquier función de activ.
         act = sum((wi*xi for wi,xi in zip(self.w, x)), self.b) 
             # zip combina wi con xi
 
@@ -35,6 +32,7 @@ class Neuron(Module):
     def __repr__(self):
         return f"Neuron({len(self.w)})"
 
+
 class Layer(Module):
     # Define una capa de neuronas
 
@@ -45,18 +43,16 @@ class Layer(Module):
         self.neurons = [Neuron(nin) for _ in range(nout)] 
             # lista de neuronas
             # todas con la misma cantidad de entradas y salidas
-        self.nonlin = nonlin
+        self.nonlin = nonlin # se agrega como atributo el tipo de función de activación
 
     def __call__(self, x):
-        # aplica la función de activación a cada neurona de la capa
+        # aplica la función de activación a cada capa
         # x es el valor de la entrada
         match self.nonlin:
             case "relu": out = [n(x).relu() for n in self.neurons] 
             case "sigmoid": out = [n(x).sigmoid() for n in self.neurons]
             case "tanh": out = [n(x).tanh() for n in self.neurons]
             case _: out = [n(x) for n in self.neurons] 
-            # se aplica la función de activación a cada neurona
-            # se llama a Neuron.__call__(x)
             
         return out[0] if len(out) == 1 else out
             # out es un arreglo de tamaño nout
