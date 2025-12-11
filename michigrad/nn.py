@@ -12,10 +12,9 @@ class Module:
 
 class Neuron(Module):
 
-    def __init__(self, nin, nonlin="relu"):
+    def __init__(self, nin):
         self.w = [Value(random.uniform(-1,1)) for _ in range(nin)]
         self.b = Value(0)
-        self.nonlin = nonlin
 
     def __call__(self, x):
         # realiza la forward pass de la neurona 
@@ -26,11 +25,7 @@ class Neuron(Module):
         act = sum((wi*xi for wi,xi in zip(self.w, x)), self.b) 
             # zip combina wi con xi
 
-        match self.nonlin:
-            case "relu": return act.relu()
-            case "sigmoid": return act.sigmoid()
-            case "tanh": return act.tanh()
-            case _: return act       
+        return act
         #return act.relu() if self.nonlin else act
 
     def parameters(self):
@@ -38,28 +33,28 @@ class Neuron(Module):
         return self.w + [self.b]
 
     def __repr__(self):
-        match self.nonlin:
-            case "relu": return f"ReLU Neuron({len(self.w)})"
-            case "sigmoid": return f"Sigmoid Neuron({len(self.w)})"
-            case "tanh": return f"Tanh Neuron({len(self.w)})"
-            case _: return f"Linear Neuron({len(self.w)})"  
-        #return f"{'ReLU' if self.nonlin else 'Linear'}Neuron({len(self.w)})"
+        return f"Neuron({len(self.w)})"
 
 class Layer(Module):
     # Define una capa de neuronas
 
-    def __init__(self, nin, nout, **kwargs):
+    def __init__(self, nin, nout, nonlin="relu", **kwargs, ):
         # recibe cantidad de entradas (nin) y salidas (nout)
         # p.e : Layer(2, 1) es una neurona que recibe dos entradas y tiene una salida
         # puede recibir nonlin
-        self.neurons = [Neuron(nin, **kwargs) for _ in range(nout)] 
+        self.neurons = [Neuron(nin) for _ in range(nout)] 
             # lista de neuronas
             # todas con la misma cantidad de entradas y salidas
+        self.nonlin = nonlin
 
     def __call__(self, x):
         # aplica la función de activación a cada neurona de la capa
         # x es el valor de la entrada
-        out = [n(x) for n in self.neurons] 
+        match self.nonlin:
+            case "relu": out = [n(x).relu() for n in self.neurons] 
+            case "sigmoid": out = [n(x).sigmoid() for n in self.neurons]
+            case "tanh": out = [n(x).tanh() for n in self.neurons]
+            case _: out = [n(x) for n in self.neurons] 
             # se aplica la función de activación a cada neurona
             # se llama a Neuron.__call__(x)
             
@@ -71,8 +66,11 @@ class Layer(Module):
         return [p for n in self.neurons for p in n.parameters()] # recorrido de lista de listas
     
     def __repr__(self):
-        return f"Layer of [{', '.join(str(n) for n in self.neurons)}]"
-
+        match self.nonlin:
+            case "relu": return f"ReLU Layer of [{', '.join(str(n) for n in self.neurons)}]"
+            case "sigmoid": return f"Sigmoid Layer of [{', '.join(str(n) for n in self.neurons)}]"
+            case "tanh": return f"Tanh Layer of [{', '.join(str(n) for n in self.neurons)}]"
+            case _: return f"Linear Layer of [{', '.join(str(n) for n in self.neurons)}]"  
 class MLP(Module):
     # perceptron multicapa
     # p.e : MLP(2, [3, 3, 1]) es un ppn con 
